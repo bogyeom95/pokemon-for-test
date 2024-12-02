@@ -1,17 +1,10 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { getPokemonListBy } from "../api/pokemon/pokemonApi";
-import {
-  NamedAPIResource,
-  NamedAPIResourceList,
-} from "../models/pokemon/common/resource";
-import useIntersectionObserver from "../hooks/useIntersectionObserver";
-
-const getSearchParamsValue = (url: string | null, key: string) => {
-  if (!url) return null;
-
-  const searchParams = new URL(url).searchParams;
-  return searchParams.get(key);
-};
+import { NamedAPIResourceList } from "../models/pokemon/common/resource";
+import PokemonList from "../components/PokeMonList";
+import { getSearchParamsValue } from "../utils/url";
+import { useInView } from "react-intersection-observer";
+import { useEffect } from "react";
 
 export default function MainPage() {
   const limit = 10;
@@ -33,11 +26,23 @@ export default function MainPage() {
     },
   }); // https://tanstack.com/query/latest/docs/framework/react/guides/infinite-queries
 
-  const [fetchTrigger] = useIntersectionObserver<HTMLDivElement>(() => {
-    if (hasNextPage && !isFetchingNextPage) {
+  const { ref, inView } = useInView({
+    threshold: 0, // 요소가 0%라도 뷰포트에 보이면 트리거
+    triggerOnce: false, // 매번 트리거되도록 설정
+  });
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage(); // 다음 페이지 로드
     }
-  });
+  }, [inView]);
+
+  // const [fetchTrigger]
+
+  // = useIntersectionObserver<HTMLDivElement>(() => {
+  //   if (hasNextPage && !isFetchingNextPage) {
+  //     fetchNextPage(); // 다음 페이지 로드
+  //   }
+  // });
 
   if (isLoading) return <div>Loading...</div>;
   if (isError)
@@ -47,19 +52,15 @@ export default function MainPage() {
       </div>
     );
 
+  const pokemonList = data?.pages.flatMap(page => page.results) || [];
   return (
     <div>
       <h1>Pokemon List</h1>
-      <ul>
-        {data?.pages.map(page =>
-          page.results.map((pokemon: NamedAPIResource, index: number) => (
-            <li key={index}>{pokemon.name}</li>
-          ))
-        )}
-      </ul>
+
+      <PokemonList pokemonList={pokemonList} />
 
       <div
-        ref={fetchTrigger}
+        ref={ref}
         className="flex h-20 w-20 items-center justify-center bg-gray-300"
       ></div>
     </div>
