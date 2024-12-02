@@ -39,6 +39,7 @@ export default function PokemonCard({ pokemonUrl }: PokemonCardProps) {
   if (!pokemon?.sprites?.other?.showdown?.front_default)
     console.log(pokemon?.name);
 
+  console.log();
   return (
     <div className="mx-auto max-w-sm rounded-lg border border-gray-800 p-4 shadow-lg">
       <h1 className="mb-4 border-b text-2xl font-bold text-gray-800">{`${id}. ${
@@ -46,11 +47,22 @@ export default function PokemonCard({ pokemonUrl }: PokemonCardProps) {
       }`}</h1>
 
       <div
-        className="relative mb-4 flex h-48 w-48 cursor-pointer items-end justify-center border-b"
+        className="relative flex h-64 w-64 cursor-pointer items-end justify-center border-b"
         onClick={() => setIsFront(!isFront)}
       >
+        {pokemon?.sprites?.other?.["official-artwork"]?.front_default && (
+          <div
+            className="absolute inset-0 z-0 opacity-20"
+            style={{
+              backgroundImage: `url(${pokemon.sprites.other["official-artwork"].front_default})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          ></div>
+        )}
+
         <div
-          className={`transition-opacity duration-500 ${
+          className={`relative z-10 mb-4 transition-opacity duration-500 ${
             isFront ? "opacity-100" : "opacity-0"
           }`}
         >
@@ -61,12 +73,13 @@ export default function PokemonCard({ pokemonUrl }: PokemonCardProps) {
                 pokemon?.sprites?.front_default
               }
               alt={`${pokemon.name} front`}
-              className="object-cover"
+              className="object-contain"
             />
           )}
         </div>
+
         <div
-          className={`absolute transition-opacity duration-500 ${
+          className={`absolute z-10 mb-4 transition-opacity duration-500 ${
             isFront ? "opacity-0" : "opacity-100"
           }`}
         >
@@ -77,7 +90,7 @@ export default function PokemonCard({ pokemonUrl }: PokemonCardProps) {
                 pokemon?.sprites?.back_default
               }
               alt={`${pokemon.name} back`}
-              className="object-cover"
+              className="object-contain"
             />
           )}
         </div>
