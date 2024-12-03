@@ -7,7 +7,7 @@ interface PokemonListProps {
 
 export default function PokemonList({ pokemonList }: PokemonListProps) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="grid grid-cols-1 gap-2 p-2 sm:grid-cols-2 md:gap-4 md:p-4 lg:grid-cols-3 2xl:grid-cols-4">
       {pokemonList.map((pokemonUrl, index) => (
         <PokemonCard key={index} pokemonUrl={pokemonUrl} />
       ))}

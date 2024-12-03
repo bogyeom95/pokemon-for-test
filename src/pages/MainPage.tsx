@@ -1,10 +1,11 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { getPokemonListBy } from "../api/pokemon/pokemonApi";
 import { NamedAPIResourceList } from "../models/pokemon/common/resource";
-import PokemonList from "../components/PokeMonList";
+
 import { getSearchParamsValue } from "../utils/url";
 import { useInView } from "react-intersection-observer";
 import { useEffect } from "react";
+import PokemonList from "../components/PokemonList";
 
 export default function MainPage() {
   const limit = 10;
@@ -27,22 +28,14 @@ export default function MainPage() {
   }); // https://tanstack.com/query/latest/docs/framework/react/guides/infinite-queries
 
   const { ref, inView } = useInView({
-    threshold: 0, // 요소가 0%라도 뷰포트에 보이면 트리거
-    triggerOnce: false, // 매번 트리거되도록 설정
+    threshold: 1,
+    triggerOnce: false,
   });
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage(); // 다음 페이지 로드
+      fetchNextPage();
     }
   }, [inView]);
-
-  // const [fetchTrigger]
-
-  // = useIntersectionObserver<HTMLDivElement>(() => {
-  //   if (hasNextPage && !isFetchingNextPage) {
-  //     fetchNextPage(); // 다음 페이지 로드
-  //   }
-  // });
 
   if (isLoading) return <div>Loading...</div>;
   if (isError)

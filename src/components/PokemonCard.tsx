@@ -1,8 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { NamedAPIResource } from "../models/pokemon/common/resource";
 import { getPokemonById } from "../api/pokemon/pokemonApi";
-import { Pokemon, PokemonType } from "../models/pokemon/pokemon";
+import {
+  Pokemon,
+  PokemonSprites,
+  PokemonType,
+} from "../models/pokemon/pokemon";
 import { useState } from "react";
+import cn from "classnames";
+import { BsFillPatchQuestionFill } from "react-icons/bs";
 
 interface PokemonCardProps {
   pokemonUrl: NamedAPIResource;
@@ -15,7 +21,6 @@ const extractIdFromUrl = (url: string): string | null => {
 
 export default function PokemonCard({ pokemonUrl }: PokemonCardProps) {
   const { name, url } = pokemonUrl;
-  const [isFront, setIsFront] = useState(true);
 
   const id = extractIdFromUrl(url);
 
@@ -36,76 +41,120 @@ export default function PokemonCard({ pokemonUrl }: PokemonCardProps) {
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error loading Pokémon data.</p>;
 
-  if (!pokemon?.sprites?.other?.showdown?.front_default)
-    console.log(pokemon?.name);
+  const officialArtworkUrl =
+    pokemon?.sprites?.other?.["official-artwork"]?.front_default;
 
-  console.log();
+  const sprites: PokemonSprites | undefined = pokemon?.sprites;
   return (
-    <div className="mx-auto max-w-sm rounded-lg border border-gray-800 p-4 shadow-lg">
-      <h1 className="mb-4 border-b text-2xl font-bold text-gray-800">{`${id}. ${
+    <div className="relative flex flex-col gap-2 rounded-lg border border-gray-800 p-2 shadow-lg">
+      {officialArtworkUrl && <BackGroundImage url={officialArtworkUrl} />}
+
+      {sprites && (
+        <PokemonAnimatedCard pokemonName={name} pokemonSprites={sprites} />
+      )}
+
+      <h1 className="text-xl font-bold text-gray-800">{`${id}. ${
         pokemon?.name || "Unknown"
       }`}</h1>
 
-      <div
-        className="relative flex h-64 w-64 cursor-pointer items-end justify-center border-b"
-        onClick={() => setIsFront(!isFront)}
-      >
-        {pokemon?.sprites?.other?.["official-artwork"]?.front_default && (
-          <div
-            className="absolute inset-0 z-0 opacity-20"
-            style={{
-              backgroundImage: `url(${pokemon.sprites.other["official-artwork"].front_default})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          ></div>
-        )}
-
-        <div
-          className={`relative z-10 mb-4 transition-opacity duration-500 ${
-            isFront ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          {pokemon?.sprites?.front_default && (
-            <img
-              src={
-                pokemon?.sprites?.other?.showdown?.front_default ||
-                pokemon?.sprites?.front_default
-              }
-              alt={`${pokemon.name} front`}
-              className="object-contain"
-            />
-          )}
-        </div>
-
-        <div
-          className={`absolute z-10 mb-4 transition-opacity duration-500 ${
-            isFront ? "opacity-0" : "opacity-100"
-          }`}
-        >
-          {pokemon?.sprites?.back_default && (
-            <img
-              src={
-                pokemon?.sprites?.other?.showdown?.back_default ||
-                pokemon?.sprites?.back_default
-              }
-              alt={`${pokemon.name} back`}
-              className="object-contain"
-            />
-          )}
-        </div>
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        {pokemon?.types?.map((pokemonType: PokemonType, idx: number) => (
-          <span
-            key={idx}
-            className={`rounded-md px-2 py-1 text-sm font-medium`}
-          >
-            {pokemonType.type.name}
-          </span>
-        ))}
-      </div>
+      <PokemonTypePlatter types={pokemon?.types || []} />
     </div>
   );
 }
+
+const PokemonAnimatedCard = ({
+  pokemonName,
+  pokemonSprites,
+}: {
+  pokemonName: string;
+  pokemonSprites: PokemonSprites;
+}) => {
+  const [isFront, setIsFront] = useState(true);
+
+  const frontImage = null;
+  // pokemonSprites.other?.showdown?.front_default ||
+  // pokemonSprites.front_default;
+  const backImage =
+    pokemonSprites.other?.showdown?.back_default || pokemonSprites.back_default;
+
+  return (
+    <button
+      className="flex h-48 items-end justify-center border-b md:h-64"
+      onClick={() => setIsFront(!isFront)}
+    >
+      {frontImage ? (
+        <PokemonImage
+          className="relative z-10 mb-4"
+          show={isFront}
+          url={frontImage}
+          alt={`${pokemonName} front`}
+        />
+      ) : (
+        <BsFillPatchQuestionFill />
+      )}
+      {backImage ? (
+        <PokemonImage
+          className="absolute z-10 mb-4"
+          show={!isFront}
+          url={backImage}
+          alt={`${pokemonName} back`}
+        />
+      ) : (
+        <BsFillPatchQuestionFill />
+      )}
+    </button>
+  );
+};
+
+const PokemonImage = ({
+  className,
+  show,
+  url,
+  alt,
+}: {
+  className?: string;
+  show: boolean;
+  url: string;
+  alt: string;
+}) => {
+  return (
+    <div
+      className={cn(
+        `cursor-pointer transition-opacity duration-500`,
+        { "opacity-100": show },
+        { "opacity-0": !show },
+        className
+      )}
+    >
+      <img src={url} alt={alt} className="object-contain" />
+    </div>
+  );
+};
+
+const BackGroundImage = ({ url }: { url: string }) => {
+  return (
+    <div
+      className="absolute inset-0 z-0 opacity-20"
+      style={{
+        backgroundImage: `url(${url})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    ></div>
+  );
+};
+
+const PokemonTypePlatter = ({ types }: { types: PokemonType[] }) => {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {types.map((pokemonType: PokemonType, idx: number) => (
+        <span
+          key={idx}
+          className={`rounded-md border-2 px-2 py-1 text-sm font-medium`}
+        >
+          {pokemonType.type.name}
+        </span>
+      ))}
+    </div>
+  );
+};
