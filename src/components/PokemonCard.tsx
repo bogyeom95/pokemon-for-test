@@ -8,7 +8,6 @@ import {
 } from "../models/pokemon/pokemon";
 import { useState } from "react";
 import cn from "classnames";
-import { BsFillPatchQuestionFill } from "react-icons/bs";
 
 interface PokemonCardProps {
   pokemonUrl: NamedAPIResource;
@@ -71,9 +70,9 @@ const PokemonAnimatedCard = ({
 }) => {
   const [isFront, setIsFront] = useState(true);
 
-  const frontImage = null;
-  // pokemonSprites.other?.showdown?.front_default ||
-  // pokemonSprites.front_default;
+  const frontImage =
+    pokemonSprites.other?.showdown?.front_default ||
+    pokemonSprites.front_default;
   const backImage =
     pokemonSprites.other?.showdown?.back_default || pokemonSprites.back_default;
 
@@ -82,25 +81,21 @@ const PokemonAnimatedCard = ({
       className="flex h-48 items-end justify-center border-b md:h-64"
       onClick={() => setIsFront(!isFront)}
     >
-      {frontImage ? (
+      {frontImage && (
         <PokemonImage
           className="relative z-10 mb-4"
           show={isFront}
           url={frontImage}
           alt={`${pokemonName} front`}
         />
-      ) : (
-        <BsFillPatchQuestionFill />
       )}
-      {backImage ? (
+      {backImage && (
         <PokemonImage
           className="absolute z-10 mb-4"
           show={!isFront}
           url={backImage}
           alt={`${pokemonName} back`}
         />
-      ) : (
-        <BsFillPatchQuestionFill />
       )}
     </button>
   );
