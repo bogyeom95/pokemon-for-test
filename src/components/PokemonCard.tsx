@@ -1,13 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
 import { NamedAPIResource } from "../models/pokemon/common/resource";
-import { getPokemonById } from "../api/pokemon/pokemonApi";
+import {
+  getPokemonById,
+  getPokemonSpeciesById,
+} from "../api/pokemon/pokemonApi";
 import {
   Pokemon,
+  PokemonSpecies,
   PokemonSprites,
   PokemonType,
 } from "../models/pokemon/pokemon";
 import { useState } from "react";
 import cn from "classnames";
+import {
+  PokemonTypeToKor,
+  PokemonTypeToSvg,
+  PokemonTypeToTailwindColor,
+} from "../models/pokemon/pokemonType";
 
 interface PokemonCardProps {
   pokemonUrl: NamedAPIResource;
@@ -27,7 +36,6 @@ export default function PokemonCard({ pokemonUrl }: PokemonCardProps) {
     data: pokemon,
     isLoading,
     isError,
-    error,
   } = useQuery<Pokemon>({
     queryKey: ["pokemon", id],
     queryFn: () => {
@@ -37,24 +45,34 @@ export default function PokemonCard({ pokemonUrl }: PokemonCardProps) {
     enabled: !!id, // ID가 있을 때만 쿼리 실행
   });
 
-  if (isLoading) return <p>Loading...</p>;
-  if (isError) return <p>Error loading Pokémon data.</p>;
+  const { data: pokemonSpecies } = useQuery<PokemonSpecies>({
+    queryKey: ["pokemon-species", id],
+    queryFn: () => {
+      if (!id) throw new Error("Invalid ID");
+      return getPokemonSpeciesById(id);
+    },
+    enabled: !!id, // ID가 있을 때만 쿼리 실행
+  });
 
   const officialArtworkUrl =
     pokemon?.sprites?.other?.["official-artwork"]?.front_default;
 
   const sprites: PokemonSprites | undefined = pokemon?.sprites;
+
+  const krName = pokemonSpecies?.names.find(
+    name => name.language.name === "ko"
+  )?.name;
   return (
-    <div className="relative flex flex-col gap-2 rounded-lg border border-gray-800 p-2 shadow-lg">
+    <div className="relative flex flex-col gap-2 rounded-lg border-slate-500 bg-white p-2 shadow">
+      <div className="flex justify-between border-b p-2">
+        <h1 className="text-xl font-bold">{`# ${id}`}</h1>
+        <h2 className="text-xl font-bold">{krName}</h2>
+      </div>
       {officialArtworkUrl && <BackGroundImage url={officialArtworkUrl} />}
 
       {sprites && (
         <PokemonAnimatedCard pokemonName={name} pokemonSprites={sprites} />
       )}
-
-      <h1 className="text-xl font-bold text-gray-800">{`${id}. ${
-        pokemon?.name || "Unknown"
-      }`}</h1>
 
       <PokemonTypePlatter types={pokemon?.types || []} />
     </div>
@@ -78,7 +96,7 @@ const PokemonAnimatedCard = ({
 
   return (
     <button
-      className="flex h-48 items-end justify-center border-b md:h-64"
+      className="flex h-32 items-end justify-center border-b md:h-48"
       onClick={() => setIsFront(!isFront)}
     >
       {frontImage && (
@@ -141,13 +159,23 @@ const BackGroundImage = ({ url }: { url: string }) => {
 
 const PokemonTypePlatter = ({ types }: { types: PokemonType[] }) => {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="z-10 flex gap-2">
       {types.map((pokemonType: PokemonType, idx: number) => (
         <span
           key={idx}
-          className={`rounded-md border-2 px-2 py-1 text-sm font-medium`}
+          className={cn(
+            `flex w-full items-center justify-center gap-2 rounded-md border-2 px-2 py-1 text-sm font-medium text-white`,
+            PokemonTypeToTailwindColor[pokemonType.type.name]
+          )}
         >
-          {pokemonType.type.name}
+          <img
+            src={PokemonTypeToSvg[pokemonType.type.name]}
+            alt={pokemonType.type.name}
+            width={20}
+            height={20}
+          />
+
+          {PokemonTypeToKor[pokemonType.type.name]}
         </span>
       ))}
     </div>

@@ -47,15 +47,22 @@ export default function MainPage() {
 
   const pokemonList = data?.pages.flatMap(page => page.results) || [];
   return (
-    <div>
-      <h1>Pokemon List</h1>
-
-      <PokemonList pokemonList={pokemonList} />
-
-      <div
-        ref={ref}
-        className="flex h-20 w-20 items-center justify-center bg-gray-300"
-      ></div>
+    <div className="">
+      <Header />
+      <main className="bg-slate-100 pt-16">
+        <PokemonList pokemonList={pokemonList} />
+      </main>
+      <div ref={ref}></div>
     </div>
   );
 }
+
+const Header = () => {
+  return (
+    <header className="fixed top-0 z-50 flex h-16 w-full items-center bg-white">
+      <h1 className="ml-8 text-4xl font-extrabold tracking-wide text-slate-500 drop-shadow-lg">
+        포키몬
+      </h1>
+    </header>
+  );
+};
