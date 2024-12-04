@@ -63,8 +63,8 @@ export default function PokemonCard({ pokemonUrl }: PokemonCardProps) {
     name => name.language.name === "ko"
   )?.name;
   return (
-    <div className="relative flex flex-col gap-2 rounded-lg border-slate-500 bg-white p-2 shadow">
-      <div className="flex justify-between border-b p-2">
+    <div className="relative flex flex-col gap-2 rounded-lg border-slate-500 bg-white p-2 shadow dark:bg-slate-700">
+      <div className="flex justify-between border-b p-2 dark:border-slate-500 dark:text-slate-200">
         <h1 className="text-xl font-bold">{`# ${id}`}</h1>
         <h2 className="text-xl font-bold">{krName}</h2>
       </div>
@@ -96,7 +96,7 @@ const PokemonAnimatedCard = ({
 
   return (
     <button
-      className="flex h-32 items-end justify-center border-b md:h-48"
+      className="flex h-32 items-end justify-center border-b md:h-48 dark:border-slate-500 dark:text-slate-200"
       onClick={() => setIsFront(!isFront)}
     >
       {frontImage && (
@@ -164,7 +164,7 @@ const PokemonTypePlatter = ({ types }: { types: PokemonType[] }) => {
         <span
           key={idx}
           className={cn(
-            `flex w-full items-center justify-center gap-2 rounded-md border-2 px-2 py-1 text-sm font-medium text-white`,
+            `flex w-full items-center justify-center gap-2 rounded-md border-2 px-2 py-1 text-sm font-medium text-white dark:border-slate-500`,
             PokemonTypeToTailwindColor[pokemonType.type.name]
           )}
         >
